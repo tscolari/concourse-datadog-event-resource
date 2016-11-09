@@ -1,4 +1,4 @@
-package params
+package resource
 
 import datadog "github.com/zorkian/go-datadog-api"
 
@@ -13,9 +13,10 @@ type Source struct {
 }
 
 type Params struct {
-	Event   datadog.Event `json:"version"`
-	Sources []string      `json:"sources"`
-	Tags    []string      `json:"tags"`
+	Event    datadog.Event `json:"version"`
+	Sources  []string      `json:"sources"`
+	Tags     []string      `json:"tags"`
+	Priority string        `json:"priority"`
 }
 
 type InOutResponse struct {

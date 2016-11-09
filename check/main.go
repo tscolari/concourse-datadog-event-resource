@@ -3,35 +3,21 @@ package main
 import (
 	"encoding/json"
 	"os"
-	"time"
 
-	"github.com/tscolari/concourse-datadog-event-resource/params"
+	"github.com/tscolari/concourse-datadog-event-resource/resource"
 	datadog "github.com/zorkian/go-datadog-api"
 )
 
 func main() {
-	input, err := params.ParseInput(os.Stdin)
+	input, err := resource.ParseInput(os.Stdin)
 	must(err)
 
 	client := datadog.NewClient(input.Source.ApiKey, input.Source.ApplicationKey)
-	end := time.Now()
-	start := end.AddDate(0, -2, 0)
+	ddResource := resource.NewDatadog(client)
 
-	events, err := client.GetEvents(
-		int(start.Unix()),
-		int(end.Unix()),
-		input.Source.Priority,
-		input.Sources(),
-		input.Tags(),
-	)
+	response, err := ddResource.Check(input)
 	must(err)
-
-	checkResponse := params.CheckResponse{}
-	for _, event := range events {
-		checkResponse = append(checkResponse, params.Version{Id: event.Id})
-	}
-
-	must(json.NewEncoder(os.Stdout).Encode(checkResponse))
+	must(json.NewEncoder(os.Stdout).Encode(response))
 }
 
 func must(err error) {

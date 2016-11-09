@@ -1,4 +1,4 @@
-package params_test
+package resource_test
 
 import (
 	. "github.com/onsi/ginkgo"
