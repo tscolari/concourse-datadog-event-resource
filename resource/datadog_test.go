@@ -89,6 +89,27 @@ var _ = Describe("Datadog", func() {
 			}))
 		})
 
+		Context("when title prefix is set", func() {
+			It("filter events that has the prefix", func() {
+				datadogClient.GetEventsReturns([]datadog.Event{
+					datadog.Event{Id: 1, Title: "my-prefix event 1"},
+					datadog.Event{Id: 2, Title: "event 2"},
+					datadog.Event{Id: 3, Title: "my-prefixevent 3"},
+					datadog.Event{Id: 4, Title: "my-prefix event 4"},
+				}, nil)
+
+				input.Source.TitlePrefix = "my-prefix"
+
+				events, err := ddResource.Check(input)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(events).To(ConsistOf(resource.CheckResponse{
+					resource.Version{Id: 1},
+					resource.Version{Id: 3},
+					resource.Version{Id: 4},
+				}))
+			})
+		})
+
 		Context("when the client returns an error", func() {
 			It("returns the error", func() {
 				datadogClient.GetEventsReturns([]datadog.Event{}, errors.New("failed badly"))
@@ -157,6 +178,19 @@ var _ = Describe("Datadog", func() {
 			_, returnedEvent, err := ddResource.In(input)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(returnedEvent).To(Equal(event))
+		})
+
+		Context("when title prefix is supplied", func() {
+			BeforeEach(func() {
+				input.Source.TitlePrefix = "my-prefix"
+			})
+
+			Context("and the event title doesn't match the title prefix", func() {
+				It("returns an error", func() {
+					_, _, err := ddResource.In(input)
+					Expect(err).To(MatchError(ContainSubstring("event `id:12345` doesn't match title prefix")))
+				})
+			})
 		})
 
 		Context("when the client returns an error", func() {
@@ -246,6 +280,22 @@ var _ = Describe("Datadog", func() {
 			_, returnedEvent, err := ddResource.Out(input)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(returnedEvent).To(Equal(event))
+		})
+
+		Context("when title prefix is supplied", func() {
+			BeforeEach(func() {
+				input.Source.TitlePrefix = "my-app"
+			})
+
+			It("prepends it to the event title when creating the event", func() {
+				_, _, err := ddResource.Out(input)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(datadogClient.PostEventCallCount()).To(Equal(1))
+				event := datadogClient.PostEventArgsForCall(0)
+
+				Expect(event.Title).To(Equal("my-app Hello"))
+			})
 		})
 
 		Context("when the client returns an error", func() {

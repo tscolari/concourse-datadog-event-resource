@@ -41,8 +41,11 @@ func (d *Datadog) Check(input Input) (CheckResponse, error) {
 	}
 
 	checkResponse := CheckResponse{}
+	titlePrefix := input.Source.TitlePrefix
 	for _, event := range events {
-		checkResponse = append(checkResponse, Version{Id: event.Id})
+		if strings.HasPrefix(event.Title, titlePrefix) {
+			checkResponse = append(checkResponse, Version{Id: event.Id})
+		}
 	}
 
 	return checkResponse, nil
@@ -52,6 +55,10 @@ func (d *Datadog) In(input Input) (InOutResponse, datadog.Event, error) {
 	event, err := d.client.GetEvent(input.Version.Id)
 	if err != nil {
 		return InOutResponse{}, datadog.Event{}, err
+	}
+
+	if !strings.HasPrefix(event.Title, input.Source.TitlePrefix) {
+		return InOutResponse{}, datadog.Event{}, fmt.Errorf("event `id:%d` doesn't match title prefix", event.Id)
 	}
 
 	response := InOutResponse{
@@ -69,6 +76,10 @@ func (d *Datadog) Out(input Input) (InOutResponse, datadog.Event, error) {
 	event.Tags = input.Params.Tags
 	if len(input.Params.Tags) == 0 {
 		event.Tags = input.Source.Tags
+	}
+
+	if input.Source.TitlePrefix != "" {
+		event.Title = fmt.Sprintf("%s %s", input.Source.TitlePrefix, event.Title)
 	}
 
 	returnedEvent, err := d.client.PostEvent(&event)
