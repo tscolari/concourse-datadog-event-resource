@@ -28,7 +28,6 @@ var _ = Describe("Parser", func() {
 				Source: resource.Source{
 					ApplicationKey: "app-key",
 					ApiKey:         "api-key",
-					DatadogUrl:     "http://endpoint",
 					Priority:       "normal",
 					TitlePrefix:    "My Event: ",
 				},
@@ -47,7 +46,6 @@ var _ = Describe("Parser", func() {
 
 			Expect(input.Source.ApiKey).To(Equal("api-key"))
 			Expect(input.Source.ApplicationKey).To(Equal("app-key"))
-			Expect(input.Source.DatadogUrl).To(Equal("http://endpoint"))
 			Expect(input.Source.Priority).To(Equal("normal"))
 			Expect(input.Source.TitlePrefix).To(Equal("My Event: "))
 
