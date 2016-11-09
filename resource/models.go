@@ -3,12 +3,16 @@ package resource
 import datadog "github.com/zorkian/go-datadog-api"
 
 type Source struct {
-	ApiKey         string   `json:"api_key"`
-	ApplicationKey string   `json:"application_key"`
-	Priority       string   `json:"priority"`
-	Sources        []string `json:"sources"`
-	Tags           []string `json:"tags"`
-	TitlePrefix    string   `json:"title_prefix"`
+	Auth        Auth     `json:"auth"`
+	Priority    string   `json:"priority"`
+	Sources     []string `json:"sources"`
+	Tags        []string `json:"tags"`
+	TitlePrefix string   `json:"title_prefix"`
+}
+
+type Auth struct {
+	ApiKey         string `json:"api_key"`
+	ApplicationKey string `json:"application_key"`
 }
 
 type Params struct {

@@ -14,7 +14,7 @@ func main() {
 	input, err := resource.ParseInput(os.Stdin)
 	must(err)
 
-	client := datadog.NewClient(input.Source.ApiKey, input.Source.ApplicationKey)
+	client := datadog.NewClient(input.Source.Auth.ApiKey, input.Source.Auth.ApplicationKey)
 	ddResource := resource.NewDatadog(client)
 
 	response, event, err := ddResource.Out(input)

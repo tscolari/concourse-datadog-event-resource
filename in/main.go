@@ -14,7 +14,7 @@ func main() {
 
 	storePath := os.Args[1]
 
-	client := datadog.NewClient(input.Source.ApiKey, input.Source.ApplicationKey)
+	client := datadog.NewClient(input.Source.Auth.ApiKey, input.Source.Auth.ApplicationKey)
 	ddResource := resource.NewDatadog(client)
 
 	response, event, err := ddResource.In(input)

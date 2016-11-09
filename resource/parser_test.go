@@ -26,10 +26,12 @@ var _ = Describe("Parser", func() {
 		BeforeEach(func() {
 			input = resource.Input{
 				Source: resource.Source{
-					ApplicationKey: "app-key",
-					ApiKey:         "api-key",
-					Priority:       "normal",
-					TitlePrefix:    "My Event: ",
+					Auth: resource.Auth{
+						ApplicationKey: "app-key",
+						ApiKey:         "api-key",
+					},
+					Priority:    "normal",
+					TitlePrefix: "My Event: ",
 				},
 				Params: resource.Params{
 					Event: datadog.Event{
@@ -44,8 +46,8 @@ var _ = Describe("Parser", func() {
 			input, err := resource.ParseInput(buffer)
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(input.Source.ApiKey).To(Equal("api-key"))
-			Expect(input.Source.ApplicationKey).To(Equal("app-key"))
+			Expect(input.Source.Auth.ApiKey).To(Equal("api-key"))
+			Expect(input.Source.Auth.ApplicationKey).To(Equal("app-key"))
 			Expect(input.Source.Priority).To(Equal("normal"))
 			Expect(input.Source.TitlePrefix).To(Equal("My Event: "))
 
