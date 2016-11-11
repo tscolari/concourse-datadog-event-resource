@@ -78,6 +78,10 @@ func (d *Datadog) Out(input Input) (InOutResponse, datadog.Event, error) {
 		event.Tags = input.Source.Tags
 	}
 
+	if event.Time == 0 {
+		event.Time = int(time.Now().Unix())
+	}
+
 	if input.Source.TitlePrefix != "" {
 		event.Title = fmt.Sprintf("%s %s", input.Source.TitlePrefix, event.Title)
 	}

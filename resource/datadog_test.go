@@ -282,6 +282,21 @@ var _ = Describe("Datadog", func() {
 			Expect(returnedEvent).To(Equal(event))
 		})
 
+		Context("when time is not set (0)", func() {
+			It("sets uses the current time", func() {
+				input.Params.Event.Time = 0
+
+				timeNow := time.Now()
+				_, _, err := ddResource.Out(input)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(datadogClient.PostEventCallCount()).To(Equal(1))
+				event := datadogClient.PostEventArgsForCall(0)
+
+				Expect(event.Time).To(BeNumerically("~", timeNow.Unix(), 5))
+			})
+		})
+
 		Context("when title prefix is supplied", func() {
 			BeforeEach(func() {
 				input.Source.TitlePrefix = "my-app"
