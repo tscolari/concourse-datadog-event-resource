@@ -212,15 +212,17 @@ var _ = Describe("Datadog", func() {
 		BeforeEach(func() {
 			timeNow = time.Now()
 			input.Params.Event = datadog.Event{
-				Title:      "Hello",
-				Text:       "World",
-				Priority:   "not-used",
-				Tags:       []string{"not", "used"},
-				Host:       "my-test.com",
-				AlertType:  "Some type",
-				SourceType: "Another type",
-				Time:       int(timeNow.Unix()),
-				Resource:   "that one",
+				Title:       "Hello",
+				Text:        "World",
+				Priority:    "super high",
+				Tags:        []string{"should", "be", "used"},
+				Host:        "my host",
+				Url:         "my-test.com",
+				AlertType:   "Some type",
+				SourceType:  "Another type",
+				Time:        int(timeNow.Unix()),
+				Resource:    "that one",
+				Aggregation: "what",
 			}
 
 			event = datadog.Event{
@@ -246,16 +248,16 @@ var _ = Describe("Datadog", func() {
 			Expect(datadogClient.PostEventCallCount()).To(Equal(1))
 			event := datadogClient.PostEventArgsForCall(0)
 
-			Expect(event.Title).To(Equal(input.Params.Event.Title))
-			Expect(event.Text).To(Equal(input.Params.Event.Text))
-			Expect(event.Priority).To(Equal(input.Params.Priority))
-			Expect(event.Tags).To(Equal(input.Params.Tags))
-			Expect(event.Resource).To(Equal(input.Params.Event.Resource))
-			Expect(event.Url).To(Equal(input.Params.Event.Url))
-			Expect(event.Host).To(Equal(input.Params.Event.Host))
-			Expect(event.AlertType).To(Equal(input.Params.Event.AlertType))
-			Expect(event.Aggregation).To(Equal(input.Params.Event.Aggregation))
-			Expect(event.Time).To(Equal(input.Params.Event.Time))
+			Expect(event.Title).To(Equal("Hello"))
+			Expect(event.Text).To(Equal("World"))
+			Expect(event.Priority).To(Equal("super high"))
+			Expect(event.Tags).To(Equal([]string{"should", "be", "used"}))
+			Expect(event.Resource).To(Equal("that one"))
+			Expect(event.Url).To(Equal("my-test.com"))
+			Expect(event.Host).To(Equal("my host"))
+			Expect(event.AlertType).To(Equal("Some type"))
+			Expect(event.Aggregation).To(Equal("what"))
+			Expect(event.Time).To(Equal(int(timeNow.Unix())))
 		})
 
 		It("returns the correct response", func() {
@@ -280,6 +282,34 @@ var _ = Describe("Datadog", func() {
 			_, returnedEvent, err := ddResource.Out(input)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(returnedEvent).To(Equal(event))
+		})
+
+		Context("when tags are not set in the event", func() {
+			It("uses the one defined in the source", func() {
+				input.Params.Event.Tags = nil
+
+				_, _, err := ddResource.Out(input)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(datadogClient.PostEventCallCount()).To(Equal(1))
+				event := datadogClient.PostEventArgsForCall(0)
+
+				Expect(event.Tags).To(Equal([]string{"source_tag1", "source_tag2"}))
+			})
+		})
+
+		Context("when priority is not set in the event", func() {
+			It("uses the one defined in the source", func() {
+				input.Params.Event.Priority = ""
+
+				_, _, err := ddResource.Out(input)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(datadogClient.PostEventCallCount()).To(Equal(1))
+				event := datadogClient.PostEventArgsForCall(0)
+
+				Expect(event.Priority).To(Equal("high"))
+			})
 		})
 
 		Context("when time is not set (0)", func() {

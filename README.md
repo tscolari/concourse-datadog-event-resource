@@ -62,8 +62,6 @@ Will create a `event.json` inside the resource path containing the event informa
 Creates an event with the given information.
 
 **Parameters:**
-* `priority`: same as from `source` but with higher precedence
-* `tags`: same as from `source` but with higher precedence
 * `title_prefix`: same as from `source` but with higher precedence
 * `event`; Required. Event structure to be created
   * `title`: Required. Event title
@@ -74,14 +72,16 @@ Creates an event with the given information.
   * `host`: Optional. Event host
   * `Resource`: Optional. Event resource
   * `Url`: Optional. Event url
+  * `tags`: same as from `source` but with higher precedence
+  * `priority`: same as from `source` but with higher precedence
 
 ### Example:
 
 ```yaml
 - put: my-app-event
   params:
-    tags: ["app"],
     event:
       title: "panic"
       text: "all panic"
+      tags: ["app"]
 ```

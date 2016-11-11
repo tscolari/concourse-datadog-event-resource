@@ -71,15 +71,16 @@ func (d *Datadog) In(input Input) (InOutResponse, datadog.Event, error) {
 
 func (d *Datadog) Out(input Input) (InOutResponse, datadog.Event, error) {
 	event := input.Params.Event
-	event.Priority = input.Priority()
+	if event.Time == 0 {
+		event.Time = int(time.Now().Unix())
+	}
 
-	event.Tags = input.Params.Tags
-	if len(input.Params.Tags) == 0 {
+	if input.Params.Event.Tags == nil && len(input.Params.Event.Tags) == 0 {
 		event.Tags = input.Source.Tags
 	}
 
-	if event.Time == 0 {
-		event.Time = int(time.Now().Unix())
+	if input.Params.Event.Priority == "" {
+		event.Priority = input.Source.Priority
 	}
 
 	if input.Source.TitlePrefix != "" {
